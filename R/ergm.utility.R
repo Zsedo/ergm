@@ -381,8 +381,13 @@ nvattr.copy.network <- function(to, from, ignore=c("bipartite","directed","hyper
 # * no (tail,head) pair has more than one edge ID associated with it
 standardize.network <- function(nw, preserve.eattr=TRUE){
   if(preserve.eattr){
-    el <- rbind(as.edgelist(nw),as.edgelist(is.na(nw)))
-    eids <- apply(el, 1, function(e) get.edgeIDs(nw, e[1], e[2], na.omit=FALSE))
+    elNA <- as.edgelist(is.na(nw))
+    el <- rbind(as.edgelist(nw),elNA)
+    if(nrow(elNA) == 0){
+        eids <- which(!sapply(nw$mel,is.null))
+    } else {
+        eids <- apply(el, 1, function(e) get.edgeIDs(nw, e[1], e[2], na.omit=FALSE))
+    }
     if(is.list(eids)){ # I.e., apply() wasn't able to simplify.
       bad.ei <- which(sapply(eids,length)>1)
       for(ei in bad.ei){
