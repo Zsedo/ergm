@@ -222,8 +222,20 @@ ergm.mple<-function(Clist, Clist.miss, m, init=NULL,
 # covar[!is.na(real.coef),!is.na(real.coef)] <- real.cov
   covar[!is.na(theta)&!m$etamap$offsettheta,
         !is.na(theta)&!m$etamap$offsettheta] <- real.cov
+        
+  # poskusimo pridobiti inverse, ce ne gre, javimo error in probamo z ginv
+  inverse <- try(solve(real.cov))
+  
+  if(inherits(inverse,"try-error")){
+    cat("Error in inverse calculation, trying generalized inverse...\n")
+    inverse <- ginv(real.cov)
+    
+    dimnames(inverse) <- dimnames(real.cov)
+  }
+  
+        
   hess[!is.na(theta)&!m$etamap$offsettheta,
-        !is.na(theta)&!m$etamap$offsettheta] <- -solve(real.cov)
+        !is.na(theta)&!m$etamap$offsettheta] <- -inverse
 #
   iteration <-  mplefit$iter 
 
